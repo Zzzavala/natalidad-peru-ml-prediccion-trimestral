@@ -1,151 +1,146 @@
-#Predicción Trimestral de la Tasa de Natalidad en el Perú
-Comparación de Modelos de Machine Learning a Nivel Departamental
+# Predicción Trimestral de la Tasa de Natalidad en el Perú
+## Comparación de Modelos de Machine Learning a Nivel Departamental
 
-Este repositorio contiene el desarrollo completo del proyecto de modelado predictivo orientado a estimar la tasa de natalidad trimestral en el Perú utilizando técnicas de Machine Learning y datos oficiales del Registro de Nacidos Vivos (2015–2025). El enfoque incorpora análisis espacio-temporal, ingeniería de características, validación temporal y comparación de algoritmos.
+Este repositorio contiene el desarrollo completo del proyecto orientado a predecir la tasa de natalidad trimestral en el Perú utilizando modelos de Machine Learning aplicados a datos oficiales del Registro de Nacidos Vivos (2015–2025). El sistema integra análisis espacio-temporal, ingeniería de características y validación temporal.
 
-#1. Descripción General
+---
 
-La tasa de natalidad peruana ha mostrado una tendencia decreciente durante la última década, con marcadas diferencias entre departamentos. Para apoyar el análisis demográfico y la toma de decisiones en salud, educación y planificación territorial, este proyecto desarrolla un sistema predictivo que integra datos sociodemográficos, geográficos y temporales en un panel trimestral departamental.
+## 1. Descripción General
 
-El modelo con mejor desempeño fue XGBoost, alcanzando un R² de 0.91 en el conjunto de prueba. Además, el análisis de importancia de variables evidencia que las características temporales y geográficas explican más del 90% del poder predictivo.
+La tasa de natalidad peruana presenta una tendencia descendente con fuertes diferencias entre departamentos. Este proyecto desarrolla un modelo predictivo capaz de capturar estas variaciones mediante un panel trimestral departamental construido a partir de millones de registros individuales.
 
-#2. Objetivos del Proyecto
+El modelo XGBoost obtuvo el mejor desempeño, alcanzando un R² de 0.91 en el conjunto de prueba, indicando una excelente capacidad de generalización.
 
-Objetivo general
+---
+
+## 2. Objetivos del Proyecto
+
+### Objetivo general
 Desarrollar y comparar modelos de Machine Learning para predecir la tasa de natalidad trimestral a nivel departamental en el Perú.
 
-Objetivos específicos
+### Objetivos específicos
+- Procesar y transformar datos individuales de nacimientos para formar un panel trimestral departamental.
+- Implementar modelos de predicción respetando la secuencia temporal.
+- Evaluar y comparar el desempeño mediante métricas estandarizadas (R², MAE, RMSE).
+- Identificar las variables con mayor influencia predictiva.
 
-Procesar y transformar datos individuales de nacimientos, construyendo un panel trimestral departamental.
+---
 
-Implementar modelos considerando la estructura temporal de las series.
+## 3. Datos Utilizados
 
-Evaluar el desempeño mediante métricas estandarizadas y validación temporal.
+### 3.1. Registros de Nacidos Vivos (2015–2025)
+Más de 4.7 millones de registros con información sociodemográfica, de salud y ubicación geográfica.
 
-Identificar las variables con mayor influencia predictiva en el modelo de mejor desempeño.
+### 3.2. Catálogo de Ubigeo del INEI
+Utilizado para asignación correcta del departamento de cada nacimiento.
 
-#3. Datos Utilizados
+### 3.3. Proyecciones de Población Departamental
+Datos anuales del INEI usados para estimar población trimestral mediante interpolación.
 
-Los datos provienen de fuentes oficiales públicas:
+---
 
-3.1. Registros de Nacidos Vivos (2015–2025)
+## 4. Proceso de Preprocesamiento
 
-Dataset con más de 4.7 millones de registros individuales, con características de:
+El pipeline incluyó:
 
-Madre (edad, educación, estado civil).
+### 4.1. Limpieza de datos
+- Eliminación de duplicados.
+- Normalización de valores especiales.
+- Conversión de valores inválidos.
+- Eliminación de campos no relevantes.
 
-Recién nacido.
+### 4.2. Integración geográfica
+- Unión por código Ubigeo.
+- Identificación del departamento correspondiente.
 
-Atención del parto.
+### 4.3. Ingeniería de características
+- Estadísticas de edad materna.
+- Promedios de variables reproductivas.
+- Proporciones de categorías agrupadas.
+- Variables temporales: lag1, lag4, MA4.
 
-Ubicación geográfica mediante código Ubigeo.
+### 4.4. Construcción del panel trimestral
+- Agregación por año, trimestre y departamento.
+- Incorporación de población trimestral.
+- Cálculo de tasa de natalidad por 1000 habitantes.
 
-3.2. Catálogo de Ubigeo del INEI
+---
 
-Utilizado para asignar cada nacimiento a su departamento correspondiente.
+## 5. Modelos Implementados
 
-3.3. Proyecciones de Población Departamental
+Se evaluaron cinco algoritmos:
 
-Datos anuales del INEI utilizados para generar poblaciones trimestrales mediante interpolación lineal.
+- Regresión Lineal
+- K-Nearest Neighbors (k = 5 y k = 10)
+- Árbol de Decisión (profundidad máxima = 6)
+- Random Forest (100 árboles)
+- XGBoost (modelo de mejor desempeño)
 
-#4. Proceso de Preprocesamiento
+Todos evaluados mediante validación cruzada temporal (TimeSeriesSplit, 5 folds).
 
-El pipeline completo incluyó:
+---
 
-Limpieza de registros:
+## 6. Resultados Principales
 
-Eliminación de duplicados.
+### 6.1. Validación Cruzada Temporal (promedio)
 
-Conversión y normalización de valores especiales.
+| Modelo             | R²      | MAE     | RMSE    |
+|-------------------|---------|---------|---------|
+| XGBoost           | 0.8632  | 0.1955  | 0.2593  |
+| Random Forest     | 0.8493  | 0.2107  | 0.2747  |
+| Árbol de Decisión | 0.7118  | 0.2715  | 0.3606  |
+| Regresión Lineal  | 0.7309  | 0.2737  | 0.3527  |
+| KNN (k = 5)       | 0.7027  | 0.2892  | 0.3636  |
 
-Tratamiento de valores ignorados o inválidos.
+### 6.2. Desempeño en el Conjunto de Prueba (2024–2025)
 
-Eliminación de variables no relevantes.
+Modelo final (XGBoost ajustado):
 
-Integración geográfica:
+- **R²:** 0.9107
+- **RMSE:** 0.2144
+- **MAE:** 0.1618
 
-Unión por código Ubigeo.
+El modelo mostró buena generalización y consistencia entre validación y prueba.
 
-Asignación de departamento.
+---
 
-Ingeniería de características:
+## 7. Importancia de Variables
 
-Cálculo de estadísticas de edad materna.
+### Importancia acumulada por categoría
+- **Temporal:** 53.08 %
+- **Geográfica:** 38.77 %
+- **Atención de salud:** 2.83 %
+- **Educación:** 1.52 %
+- **Edad materna:** 1.04 %
+- **Reproductivo:** 0.99 %
 
-Promedios de historia reproductiva.
+Las variables temporales lag1, lag4 y MA4 fueron las más influyentes.
 
-Proporciones de categorías agregadas (educación, estado civil, financiador, tipo de atención).
+---
 
-Creación de variables temporales: lag1, lag4, ma4.
+## 8. Exclusión del Período COVID-19
 
-Construcción del panel trimestral departamental:
+Se compararon modelos entrenados con y sin los datos de 2020–2021T2.  
+La exclusión del período COVID mejoró todas las métricas, debido a comportamientos atípicos durante la pandemia.
 
-Agregación por año, trimestre y departamento.
+---
 
-Incorporación de población trimestral.
+## 9. Conclusiones
 
-Cálculo de la tasa de natalidad por 1000 habitantes.
+- Los modelos basados en árboles superaron ampliamente a los lineales.
+- XGBoost alcanzó el mejor desempeño, capturando patrones no lineales y dependencias temporales.
+- Las variables temporales y geográficas explicaron más del 90 % del poder predictivo.
+- La exclusión del período COVID mejoró la estabilidad del modelo.
 
-#5. Modelos Implementados
+---
 
-Se compararon cinco algoritmos representativos de distintos paradigmas:
+## 10. Autores
 
-Regresión Lineal
+Proyecto desarrollado por el Grupo 08:
 
-K-Nearest Neighbors (k=5 y k=10)
-
-Árbol de Decisión (max_depth=6)
-
-Random Forest (100 árboles, max_depth=6)
-
-XGBoost (mejor desempeño)
-
-Todos los modelos se evaluaron con validación cruzada temporal (TimeSeriesSplit, 5 folds) para respetar la estructura cronológica.
-
-#6. Resultados Principales
-6.1. Validación Cruzada Temporal (promedio)
-
-XGBoost: R² = 0.8632, MAE = 0.1955
-
-Random Forest: R² = 0.8493, MAE = 0.2107
-
-Árbol de Decisión: R² = 0.7118, MAE = 0.2715
-
-Regresión Lineal: R² = 0.7309, MAE = 0.2737
-
-KNN (k=5): R² = 0.7027, MAE = 0.2892
-
-6.2. Evaluación en el Conjunto de Prueba (2024–2025)
-
-Modelo final (XGBoost con parámetros ajustados):
-
-R²: 0.9107
-
-RMSE: 0.2144
-
-MAE: 0.1618
-
-El modelo mostró alta capacidad de generalización y estabilidad.
-
-#7. Importancia de Variables
-
-El análisis de importancia del modelo XGBoost reveló:
-
-Categoría Temporal: 53.08 %
-
-Categoría Geográfica: 38.77 %
-
-Atención de salud: 2.83 %
-
-Educación: 1.52 %
-
-Edad materna: 1.04 %
-
-Factores reproductivos: 0.99 %
-
-Las variables lag1, lag4 y ma4 fueron las más influyentes, evidenciando un fuerte componente de inercia temporal en la natalidad.
-
-#8. Exclusión del Período COVID-19
-
-Se realizaron experimentos comparando modelos entrenados con y sin datos correspondientes al período COVID-19 (2020–2021T2).
-La exclusión de este período mejoró todas las métricas, demostrando que dichos valores representan eventos atípicos que introducen ruido y reducen la capacidad de generalización.
+- John Arzapalo
+- Ariana Burga
+- Ricardo Lara
+- Luis Miranda
+- Alessandro Santé
+- Juan Zavala
